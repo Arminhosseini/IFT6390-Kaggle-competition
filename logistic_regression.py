@@ -6,52 +6,71 @@ class logistic_regression():
     def __init__(self) -> None:
         self.loss = 0
 
-    def sigmoid(self, z):
-        if z >= 0:
-            exp = np.exp(-z)
-            return 1/(exp+1)
-        else:
-            exp = np.exp(z)
-            return exp/(exp+1)
+    def softmax(self, z):
+        p = (np.exp(z.T) / np.sum(np.exp(z), axis=1)).T
+        return p
 
-    def compute_sigmoid(self, z):
-        sigmoid_func = np.vectorize(self.sigmoid)
-        res = sigmoid_func(z)
-        return res
+    def one_hot_encoding(self, y):
+        onehot = []
+        for target in y:
+            if target == 0:
+                encode = np.array([1, 0, 0])
+            elif target == 1:
+                encode = np.array([0, 1, 0])
+            elif target == 2:
+                encode = np.array([0, 0, 1])
+
+            onehot.append(encode)
+        return np.array(onehot)
 
     def compute_loss(self, y_hat, y):
-        m = y_hat.shape[0]
-        L = (-1/m) * np.sum((y * np.log(y_hat + 1e-9)) +
-                            ((1 - y) * np.log(1 - y_hat + 1e-9)))
-        return L
+        n = len(y)
+        f = y * np.log(y_hat)
+        f = f.to_numpy()
+        loss = -(np.sum(f))/n
+        return loss
 
     def gradients(self, x, y, predictions):
-        # w = np.mean(np.matmul(x.T, (predictions - y)))
-        # b = np.mean(predictions - y)
-        # return w, b
-        difference = predictions - y
-        gradient_b = np.mean(difference)
-        gradients_w = np.matmul(x.transpose(), difference)
-        gradients_w = np.array([np.mean(grad) for grad in gradients_w])
+        n = len(y)
+        w = -(np.dot(x.T, (y - predictions)))/n
+        # w = np.mean(np.matmul(x.T, (predictions - y)), axis=1)
+        b = np.mean(predictions - y)
+        return w, b
 
-        return gradients_w, gradient_b
+    def show_err(self, epoch, error):
+        plt.figure(figsize=(9, 4))
+        plt.plot(epoch, error, "m-")
+        plt.xlabel("Number of Epoch")
+        plt.ylabel("Error")
+        plt.title("Error Minimization")
+        plt.show()
 
     def fit(self, X, y, epochs, learning_rate):
         self.bias = 0
-        self.weights = np.zeros(X.shape[1])
+        num_epoch = []
+        error = []
+        y = self.one_hot_encoding(y)
+        self.weights = np.random.uniform(-1, 1, size=(X.shape[1], y.shape[1]))
 
         for epoch in range(epochs):
-            z = np.matmul(X, self.weights.T) + self.bias
-            predictions = self.compute_sigmoid(z)
+            z = np.matmul(X, self.weights) + self.bias
+            predictions = self.softmax(z)
             self.loss = self.compute_loss(predictions, y)
             weights, bias = self.gradients(X, y, predictions)
             self.weights = self.weights - learning_rate * weights
             self.bias = self.bias - learning_rate * bias
+            if epoch % 100 == 0:
+                num_epoch.append(epoch)
+                error.append(self.loss)
+                print(f'epoch {epoch}, Error = {self.loss}')
+
+        self.show_err(num_epoch, error)
 
     def predict(self, x):
-        z = np.matmul(x, self.weights.T) + self.bias
-        probabilities = self.compute_sigmoid(z)
-        return probabilities
+        z = np.matmul(x, self.weights) + self.bias
+        probabilities = self.softmax(z)
+        predictions = np.argmax(probabilities, axis=1)
+        return predictions
 
     def accuracy(self, y, predictions):
         return np.mean(y == predictions)

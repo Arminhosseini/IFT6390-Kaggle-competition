@@ -211,3 +211,7 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/linux,python,visualstudiocode
 
 /Dataset
+
+submission.csv
+test.ipynb
+kaggle.py
