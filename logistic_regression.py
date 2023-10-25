@@ -28,13 +28,19 @@ class logistic_regression():
         f = y * np.log(y_hat)
         f = f.to_numpy()
         loss = -(np.sum(f))/n
+        # add the Lasso penalty term
+        # lasso_penalty = self.alpha * np.sum(np.abs(self.weights))
+        # loss += lasso_penalty
         return loss
 
     def gradients(self, x, y, predictions):
         n = len(y)
-        w = -(np.dot(x.T, (y - predictions)))/n
-        # w = np.mean(np.matmul(x.T, (predictions - y)), axis=1)
+        # w = -(np.dot(x.T, (y - predictions)))/n
+        w = (np.dot(x.T, (predictions - y)))/n
         b = np.mean(predictions - y)
+        # add the Lasso penalty term
+        # lasso_penalty = self.alpha * np.sign(self.weights)
+        # w += lasso_penalty
         return w, b
 
     def show_err(self, epoch, error):
@@ -45,10 +51,11 @@ class logistic_regression():
         plt.title("Error Minimization")
         plt.show()
 
-    def fit(self, X, y, epochs, learning_rate):
+    def fit(self, X, y, epochs, learning_rate, alpha):
         self.bias = 0
         num_epoch = []
         error = []
+        self.alpha = alpha
         y = self.one_hot_encoding(y)
         self.weights = np.random.uniform(-1, 1, size=(X.shape[1], y.shape[1]))
 
