@@ -11,6 +11,18 @@ class Learning_data():
         self.alpha = alpha
         return
 
+    def data_preprocessing(self, data: pd.DataFrame) -> pd.DataFrame:
+        data['time'] = pd.to_datetime(
+            data['time'], format='%Y%m%d')
+
+        data['day_of_year'] = data['time'].dt.dayofyear
+
+        data['day_of_year'] = (data['day_of_year']*np.pi)/180
+        data['sin_time'] = np.sin(data['day_of_year'])
+        data['cos_time'] = np.cos(data['day_of_year'])
+
+        return data
+
     def test_preprocessing(self, test) -> pd.DataFrame:
         test['time'] = pd.to_datetime(
             test['time'], format='%Y%m%d')
