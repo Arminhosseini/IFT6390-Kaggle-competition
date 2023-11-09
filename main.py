@@ -8,11 +8,15 @@ from preprocessing import preprocessing
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
+import os
+from dotenv import load_dotenv
 import argparse
+load_dotenv()
+
 
 # Read the data
-data = pd.read_csv('Dataset/train.csv', index_col=0)
-test_data = pd.read_csv('Dataset/test.csv', index_col=0)
+data = pd.read_csv(os.environ.get('TRAIN_PATH'), index_col=0)
+test_data = pd.read_csv(os.environ.get('TEST_PATH'), index_col=0)
 # Initialize the classes
 prepro = preprocessing()
 lr = logistic_regression()
@@ -178,7 +182,7 @@ try:
         degrees = [1, 2, 3, 4, 5]
         # Create a dataframe to store the results
         df = pd.DataFrame(
-            columns=['kernel', 'C', 'gamma', 'train_acc', 'valid_acc'])
+            columns=['kernel', 'C', 'gamma', 'degree', 'train_acc', 'valid_acc'])
         # Loop through all the hyperparameters and store the results in the dataframe
         for c in Cs:
             for gamma in gammas:
@@ -189,8 +193,8 @@ try:
                 train_acc = accuracy_score(y_train, svc.predict(X_train))
                 val_acc = accuracy_score(y_val, svc.predict(X_val))
                 # Store the results in the dataframe
-                new_row = {'kernel': 'rbf', 'C': c, 'gamma': gamma, 'degree': 0,
-                           'train_acc': train_acc, 'valid_acc': val_acc}
+                new_row = {'kernel': 'rbf', 'C': c, 'gamma': gamma,
+                           'degree': 0, 'train_acc': train_acc, 'valid_acc': val_acc}
                 df.loc[len(df)] = new_row
                 # Sort the dataframe by the validation accuracy in order to find the best hyperparameters
                 df = df.sort_values(by=['valid_acc'])
@@ -205,8 +209,8 @@ try:
             train_acc = accuracy_score(y_train, svc.predict(X_train))
             val_acc = accuracy_score(y_val, svc.predict(X_val))
             # Store the results in the dataframe
-            new_row = {'kernel': 'poly', 'C': 0, 'gamma': 0, 'degree': degree,
-                       'train_acc': train_acc, 'valid_acc': val_acc}
+            new_row = {'kernel': 'poly', 'C': 0, 'gamma': 0,
+                       'degree': degree, 'train_acc': train_acc, 'valid_acc': val_acc}
             df.loc[len(df)] = new_row
             # Sort the dataframe by the validation accuracy in order to find the best hyperparameters
             df = df.sort_values(by=['valid_acc'])

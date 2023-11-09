@@ -30,3 +30,63 @@ The data set for this competition is a relatively small portion of a bigger data
 * Z1000: geopotential Z at 1000 mbar pressure surface [m]
 * Z200: geopotential Z at 200 mbar pressure surface [m]
 * ZBOT: lowest modal level height [m]
+
+
+# How to run the code
+First you have to install the packages
+```python
+pip install -r requirement.txt
+```
+
+Then you have to make an environment file .env and write your train and test data path into it
+
+```python
+TRAIN_PATH = 'Dataset/train.csv'
+TEST_PATH = 'Dataset/test.csv'
+```
+After that you can run the code in the main.py file but you have to give it inputs regarding the work you want to do. The pattern is like this.
+```python
+python main.py svm hptuning
+```
+The first parameter is the model that you want to work with which can be among these three models.
+
+1. logistic
+2. randomforest
+3. svm
+
+The second parameter shows that you want to tune the hyper-parameters or you want to run the code with specific set of hyper-parameters and get the predictions on the test set and save it in a .csv file. This input has two states.
+
+1. hptuning
+2. submit   
+
+If you choose the hptuning the code will run with the set of hyper-parameters that are defined in the code and give you the results. But if you choose the submit you have to provide the set of hyper-parameters that you want to feed to your model. This set of hyper-parameters can be among the provided hyper-parameters.
+
+* --learning_rate
+* --rho
+* --alpha
+* --loggamma
+* --n_estimators
+* --max_depth
+* --min_samples_split
+* --min_samples_leaf
+* --kernel
+* --degree
+* --C
+* --svmgamma
+
+These are all the hyper-parameters but keep that in mind you don't need to provide them all. You only need to provide the hyper-parameters correspond to the model that you want to use. For example if you want to use logistic regression for submission you have to run a code like this.
+```python
+python main.py logistic submit --learning_rate 0.10 --rho 0.99 --loggamma 0.98 --alpha 0.00001 
+```
+For SVM you have to run something like this:
+```python
+python main.py svm submit --kernel rbf --c 100 --svmgamma 0.01
+```
+or for polynomial kernel:
+```python
+python main.py svm submit --kernel poly --degree 2
+```
+And for random forest you can run the code like this:
+```python
+python main.py randomforest submit --n_estimators 100 --max_depth 10 --min_samples_split 20 --min_samples_leaf 5
+```
